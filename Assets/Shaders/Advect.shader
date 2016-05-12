@@ -34,7 +34,7 @@
             float4 frag(v2f i) : COLOR {
                 float4 result;
                 
-                // Check to see if an obstacle is present.
+                // See if an obstacle is present.
                 float solidObstacle = tex2D(_Obstacles, i.uv).x;
                 if (solidObstacle > 0.0) {
                     result = float4(0, 0, 0, 0);
