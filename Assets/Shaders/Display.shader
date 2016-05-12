@@ -1,6 +1,6 @@
-﻿Shader "Unlit/Display" {
+﻿Shader "Custom/Display" {
 	Properties {
-		_MainTex ("Texture", 2D) = "black" {}
+		_MainTex ("Texture", 2D) = "white" {}
 	}
 
 	SubShader {
@@ -35,11 +35,12 @@
 				float main = tex2D(_MainTex, i.uv).x;
                 float solid = tex2D(_Solids, i.uv).x;
 
-                // Determine the colour 
+                // Determine the colour.
                 float3 color = float3(solid, solid, solid);
                 color.x += main.x;        
 				return float4(color, 1);
 			}
+
 			ENDCG
 		}
 	}
