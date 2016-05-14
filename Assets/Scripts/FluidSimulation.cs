@@ -25,7 +25,7 @@ public class FluidSimulation : MonoBehaviour {
         displayWidth = (int)display.pixelInset.width;
         displayHeight = (int)display.pixelInset.height;
 
-        displayArea = new Vector2(1 / displayWidth, 1 / displayHeight);
+        displayArea = new Vector2(1.0f / displayWidth, 1.0f / displayHeight);
 
         // Setup the main render texture.
         displayTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.ARGB32);
@@ -36,9 +36,9 @@ public class FluidSimulation : MonoBehaviour {
         GetComponent<GUITexture>().texture = displayTexture;
 
         // Setup the solid shapes texture.
-        solidsTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.ARGB32);
+        solidsTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
         solidsTexture.wrapMode = TextureWrapMode.Clamp;
-        solidsTexture.filterMode = FilterMode.Bilinear;
+        solidsTexture.filterMode = FilterMode.Point;
         solidsTexture.Create();
 
         displayMaterial.SetTexture("_Solids", solidsTexture);

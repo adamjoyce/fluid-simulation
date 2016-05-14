@@ -37,7 +37,7 @@
 
                 // Determine the colour.
                 float3 color = float3(solid, solid, solid);
-                color.x += main.x;        
+                color.x += main;        
 				return float4(color, 1);
 			}
 
