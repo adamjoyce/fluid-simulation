@@ -47,13 +47,14 @@ public class FluidSimulation : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        placeSolids();
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
     }
 
     private void placeSolids() {
         solidsMaterial.SetVector("_Size", displayArea);
         solidsMaterial.SetVector("_Location", new Vector2(0.5f, 0.5f));
-        solidsMaterial.SetFloat("_Radius", 0.5f);
+        solidsMaterial.SetFloat("_Radius", 0.1f);
         Graphics.Blit(null, solidsTexture, solidsMaterial);
     }
 }
