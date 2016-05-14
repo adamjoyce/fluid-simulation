@@ -15,7 +15,8 @@ public class FluidSimulation : MonoBehaviour {
     private RenderTexture solidsTexture;
 
     private GUITexture display;
-    int displayWidth, displayHeight;
+    private int displayWidth, displayHeight;
+    private Vector2 displayArea;
 
 	// Use this for initialization
 	void Start () {
@@ -24,6 +25,8 @@ public class FluidSimulation : MonoBehaviour {
         displayWidth = (int)display.pixelInset.width;
         displayHeight = (int)display.pixelInset.height;
 
+        displayArea = new Vector2(1 / displayWidth, 1 / displayHeight);
+
         // Setup the main render texture.
         displayTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.ARGB32);
         displayTexture.wrapMode = TextureWrapMode.Clamp;
@@ -31,10 +34,26 @@ public class FluidSimulation : MonoBehaviour {
         displayTexture.Create();
 
         GetComponent<GUITexture>().texture = displayTexture;
+
+        // Setup the solid shapes texture.
+        solidsTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.ARGB32);
+        solidsTexture.wrapMode = TextureWrapMode.Clamp;
+        solidsTexture.filterMode = FilterMode.Bilinear;
+        solidsTexture.Create();
+
+        displayMaterial.SetTexture("_Solids", solidsTexture);
+        placeSolids();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
+        Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
+    }
+
+    private void placeSolids() {
+        solidsMaterial.SetVector("_Size", displayArea);
+        solidsMaterial.SetVector("_Location", new Vector2(0.5f, 0.5f));
+        solidsMaterial.SetFloat("_Radius", 0.5f);
+        Graphics.Blit(null, solidsTexture, solidsMaterial);
+    }
 }

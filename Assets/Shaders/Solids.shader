@@ -1,8 +1,4 @@
-﻿Shader "Unlit/Solids" {
-    Properties {
-    _MainTex("Texture", 2D) = "white" {}
-    }
-
+﻿Shader "Custom/Solids" {
     SubShader {
         Pass {
             CGPROGRAM
@@ -20,7 +16,7 @@
 
             uniform float2 _Size;
             uniform float2 _Location;
-            uniform float2 _Radius;
+            uniform float _Radius;
 
             // Vertex program.
             v2f vert(appdata_base v) {
@@ -32,20 +28,20 @@
 
             // Fragment program.
             float4 frag(v2f i) : COLOR {
-                float4 result = float4(0, 0, 0, 0);
+                float4 color = float4(1, 1, 1, 0);
 
                 // Draw bounding edges.
-                if (i.uv.x <= _Size.x)
-                    result = float4(1, 1, 1, 1);
+                /*if (i.uv.x <= _Size.x)
+                    color = float4(1, 1, 1, 1);
                 else if (i.uv.x >= 1.0 - _Size.x)
-                    result = float4(1, 1, 1, 1);
+                    color = float4(1, 1, 1, 1);
 
                 if (i.uv.y <= _Size.y)
-                    result = float4(1, 1, 1, 1);
+                    color = float4(1, 1, 1, 1);
                 else if (i.uv.y >= 1.0 - _Size.y)
-                    result = float4(1, 1, 1, 1);
+                    color = float4(1, 1, 1, 1);*/
 
-                return result;
+                return color;
             }
 
             ENDCG
