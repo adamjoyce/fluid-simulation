@@ -18,7 +18,7 @@
             uniform sampler2D _SourceTexture;
             uniform sampler2D _Solids;
 
-            uniform float2 _InverseSize;
+            uniform float2 _SizeInversed;
             uniform float _TimeStep;
             uniform float _Dissipation;
 
@@ -45,7 +45,7 @@
                 float2 velocity = tex2D(_VelocityTexture, i.uv).xy;
 
                 // Coordinate accounting for the inverse size, the timestep, and the input velocity.
-                float2 nextCoord = i.uv - (_InverseSize * _TimeStep * velocity);
+                float2 nextCoord = i.uv - (_SizeInversed * _TimeStep * velocity);
 
                 // Account for dissipation and get the color on the source texture.
                 color = tex2D(_SourceTexture, nextCoord) * _Dissipation;
