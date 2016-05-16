@@ -18,6 +18,8 @@ public class FluidSimulation : MonoBehaviour {
     private int displayWidth, displayHeight;
     private Vector2 displayArea;
 
+    private Vector2 solidPosition = new Vector2(0.5f, 0.5f);
+
 	// Use this for initialization
 	void Start () {
         // Setup the main GUI texture.
@@ -42,7 +44,7 @@ public class FluidSimulation : MonoBehaviour {
         solidsTexture.Create();
 
         displayMaterial.SetTexture("_Solids", solidsTexture);
-        placeSolids();
+        //placeSolids();
 	}
 	
 	// Update is called once per frame
@@ -53,7 +55,7 @@ public class FluidSimulation : MonoBehaviour {
 
     private void placeSolids() {
         solidsMaterial.SetVector("_Size", displayArea);
-        solidsMaterial.SetVector("_Location", new Vector2(0.5f, 0.5f));
+        solidsMaterial.SetVector("_Location", solidPosition);
         solidsMaterial.SetFloat("_Radius", 0.1f);
         Graphics.Blit(null, solidsTexture, solidsMaterial);
     }
