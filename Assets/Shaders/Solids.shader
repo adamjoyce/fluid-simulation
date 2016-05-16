@@ -28,27 +28,25 @@
 
             // Fragment program.
             float4 frag(v2f i) : COLOR {
-                float4 color = float4(0, 0, 0, 0);
+                float4 color = float4(1, 1, 1, 1);
 
                 // Draw bounding edges.
                 if (i.uv.x <= _Size.x) {
-                    color = float4(1, 1, 1, 1);
-                }
-                if (i.uv.x >= 1.0 - _Size.x) {
-                    color = float4(1, 1, 1, 1);
+                    color = float4(0, 0, 0, 0);
+                } else if (i.uv.x >= 1.0 - _Size.x) {
+                    color = float4(0, 0, 0, 0);
                 }
 
                 if (i.uv.y <= _Size.y) {
-                    color = float4(1, 1, 1, 1);
-                }
-                if (i.uv.y >= 1.0 - _Size.y) {
-                    color = float4(1, 1, 1, 1);
+                    color = float4(0, 0, 0, 0);
+                } else if (i.uv.y >= 1.0 - _Size.y) {
+                    color = float4(0, 0, 0, 0);
                 }
 
                 // Draw point in circle.
                 float loc = distance(_Location, i.uv);
                 if (loc < _Radius) {
-                    color = float4(1, 1, 1, 1);
+                    color = float4(0, 0, 0, 0);
                 }
 
                 return color;
