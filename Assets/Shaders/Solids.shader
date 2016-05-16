@@ -43,7 +43,7 @@
                     color = float4(0, 0, 0, 0);
                 }
 
-                // Draw point in circle.
+                // Draw point location in circle.
                 float loc = distance(_Location, i.uv);
                 if (loc < _Radius) {
                     color = float4(0, 0, 0, 0);

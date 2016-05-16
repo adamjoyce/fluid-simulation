@@ -13,6 +13,7 @@ public class FluidSimulation : MonoBehaviour {
 
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
+    private RenderTexture[] velocityTexture;
 
     private GUITexture display;
     private int displayWidth, displayHeight;
@@ -20,8 +21,11 @@ public class FluidSimulation : MonoBehaviour {
 
     private Vector2 solidPosition = new Vector2(0.5f, 0.5f);
 
-	// Use this for initialization
-	void Start () {
+    private float timeIncrement = 0.1f;
+    private float velocityDissipation = 0.5f;
+
+	// For initialization.
+	private void Start () {
         // Setup the main GUI texture.
         display = GetComponent<GUITexture>();
         displayWidth = (int)display.pixelInset.width;
@@ -35,28 +39,50 @@ public class FluidSimulation : MonoBehaviour {
         displayTexture.filterMode = FilterMode.Bilinear;
         displayTexture.Create();
 
-        GetComponent<GUITexture>().texture = displayTexture;
-
         // Setup the solid shapes texture.
         solidsTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
         solidsTexture.wrapMode = TextureWrapMode.Clamp;
         solidsTexture.filterMode = FilterMode.Point;
         solidsTexture.Create();
 
+        // Setup the 0 index read and 1 index write render textures.
+        velocityTexture = new RenderTexture[2];
+
+        GetComponent<GUITexture>().texture = displayTexture;
         displayMaterial.SetTexture("_Solids", solidsTexture);
-        //placeSolids();
+        PlaceSolids();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        placeSolids();
+	private void Update () {
+        Advect(velocityTexture[0], velocityTexture[0], velocityTexture[1], velocityDissipation);
+        SwapTextures(velocityTexture);
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
     }
 
-    private void placeSolids() {
+    // Draws the solids texture and copies it into the solid render texture.
+    private void PlaceSolids() {
         solidsMaterial.SetVector("_Size", displayArea);
         solidsMaterial.SetVector("_Location", solidPosition);
         solidsMaterial.SetFloat("_Radius", 0.1f);
         Graphics.Blit(null, solidsTexture, solidsMaterial);
+    }
+
+    // Advect's a source texture against the veloicty texture.
+    private void Advect(RenderTexture velocity, RenderTexture source, RenderTexture destination, float dissipation) {
+        advectMaterial.SetTexture("_VelocityTexture", velocity);
+        advectMaterial.SetTexture("_SourceTexture", source);
+        advectMaterial.SetTexture("_Solids", solidsTexture);
+        advectMaterial.SetVector("_Size", displayArea);
+        advectMaterial.SetFloat("_TimeIncrement", timeIncrement);
+        advectMaterial.SetFloat("_Dissipation", dissipation);
+        Graphics.Blit(null, destination, advectMaterial);
+    }
+
+    // Swap the read an write render textures.
+    private void SwapTextures(RenderTexture[] texture) {
+        RenderTexture tempTexture = texture[0];
+        texture[0] = texture[1];
+        texture[1] = tempTexture;
     }
 }
