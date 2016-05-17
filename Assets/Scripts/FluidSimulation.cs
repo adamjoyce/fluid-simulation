@@ -80,6 +80,10 @@ public class FluidSimulation : MonoBehaviour {
         SwapTextures(densityTexture);
         SwapTextures(temperatureTexture);
 
+        // Get the changes in velocity due to convection currents.
+        AddBuoyancy(velocityTexture[0], densityTexture[0], temperatureTexture[0], velocityTexture[1]);
+        SwapTextures(velocityTexture);
+
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
     }
 
@@ -134,5 +138,10 @@ public class FluidSimulation : MonoBehaviour {
         buoyancyMaterial.SetFloat("_FluidBuoyancy", fluidBuoyancy);
         buoyancyMaterial.SetFloat("_FluidWeight", fluidWeight);
         Graphics.Blit(null, destination, buoyancyMaterial);
+    }
+
+    //
+    private void AddImpulse() {
+
     }
 }
