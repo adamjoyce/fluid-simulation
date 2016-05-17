@@ -10,6 +10,7 @@ public class FluidSimulation : MonoBehaviour {
     public Material buoyancyMaterial;
     public Material displayMaterial;
     public Material solidsMaterial;
+    public Material impulseMaterial;
 
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
@@ -31,6 +32,11 @@ public class FluidSimulation : MonoBehaviour {
     private float ambientTemperature = 0.0f;
     private float fluidBuoyancy = 1.0f;
     private float fluidWeight = 0.1f;
+
+    private Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
+    private float impulseRadius = 0.1f;
+    private float impulseTemperature = 10.0f;
+    private float impulseDensity = 1.0f;
 
 	// For initialization.
 	private void Start () {
@@ -84,7 +90,13 @@ public class FluidSimulation : MonoBehaviour {
         AddBuoyancy(velocityTexture[0], densityTexture[0], temperatureTexture[0], velocityTexture[1]);
         SwapTextures(velocityTexture);
 
-        Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
+        AddImpulse(temperatureTexture[0], temperatureTexture[1], mainImpulsePosition, impulseRadius, impulseTemperature);
+        AddImpulse(densityTexture[0], densityTexture[1], mainImpulsePosition, impulseRadius, impulseDensity);
+
+        SwapTextures(temperatureTexture);
+        SwapTextures(densityTexture);
+
+        Graphics.Blit(densityTexture[0], displayTexture, displayMaterial);
     }
 
     // Setup and create the textures in the texture arrays.
@@ -140,8 +152,12 @@ public class FluidSimulation : MonoBehaviour {
         Graphics.Blit(null, destination, buoyancyMaterial);
     }
 
-    //
-    private void AddImpulse() {
-
+    // Simulates a impulse to the fluid.
+    private void AddImpulse(RenderTexture source, RenderTexture destination, Vector2 location, float radius, float fill) {
+        impulseMaterial.SetTexture("_SourceTexture", source);
+        impulseMaterial.SetVector("_Location", location);
+        impulseMaterial.SetFloat("_Radius", radius);
+        impulseMaterial.SetFloat("_Fill", fill);
+        Graphics.Blit(null, destination, impulseMaterial);
     }
 }
