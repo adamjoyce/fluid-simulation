@@ -14,6 +14,8 @@ public class FluidSimulation : MonoBehaviour {
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
     private RenderTexture[] velocityTexture;
+    private RenderTexture[] densityTexture;
+    private RenderTexture[] temperatureTexture;
 
     private GUITexture display;
     private int displayWidth, displayHeight;
@@ -23,6 +25,8 @@ public class FluidSimulation : MonoBehaviour {
 
     private float timeIncrement = 0.1f;
     private float velocityDissipation = 0.5f;
+    private float densityDissipation = 0.5f;
+    private float temperatureDissipation = 0.5f;
 
 	// For initialization.
 	private void Start () {
@@ -47,7 +51,11 @@ public class FluidSimulation : MonoBehaviour {
 
         // Setup the 0 index read and 1 index write render textures.
         velocityTexture = new RenderTexture[2];
-        CreateTextures(velocityTexture, RenderTextureFormat.RFloat, FilterMode.Bilinear);
+        CreateTextures(velocityTexture, RenderTextureFormat.RGFloat);
+
+        // Setup textures for the density and temperature of the fluid.
+        CreateTextures(densityTexture, RenderTextureFormat.RFloat);
+        CreateTextures(temperatureTexture, RenderTextureFormat.RFloat);
 
         GetComponent<GUITexture>().texture = displayTexture;
         displayMaterial.SetTexture("_Solids", solidsTexture);
@@ -56,13 +64,21 @@ public class FluidSimulation : MonoBehaviour {
 	
 	// Update is called once per frame
 	private void Update () {
+        // Advect the velocity, temperature, and density against the velocity.
         Advect(velocityTexture[0], velocityTexture[0], velocityTexture[1], velocityDissipation);
+        Advect(velocityTexture[0], densityTexture[0], densityTexture[1], densityDissipation);
+        Advect(velocityTexture[0], temperatureTexture[0], temperatureTexture[1], temperatureDissipation);
+
+        // Swap the texture arrays.
         SwapTextures(velocityTexture);
+        SwapTextures(densityTexture);
+        SwapTextures(velocityTexture);
+
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
     }
 
     // Setup and create the textures in the texture arrays.
-    private void CreateTextures(RenderTexture[] texture, RenderTextureFormat format, FilterMode filterMode) {
+    private void CreateTextures(RenderTexture[] texture, RenderTextureFormat format, FilterMode filterMode = FilterMode.Bilinear) {
         // Setup read texture.
         texture[0] = new RenderTexture(displayWidth, displayHeight, 0, format, RenderTextureReadWrite.Linear);
         texture[0].wrapMode = TextureWrapMode.Clamp;
