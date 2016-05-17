@@ -28,6 +28,10 @@ public class FluidSimulation : MonoBehaviour {
     private float densityDissipation = 0.5f;
     private float temperatureDissipation = 0.5f;
 
+    private float ambientTemperature = 0.0f;
+    private float fluidBuoyancy = 1.0f;
+    private float fluidWeight = 0.1f;
+
 	// For initialization.
 	private void Start () {
         // Setup the main GUI texture.
@@ -74,7 +78,7 @@ public class FluidSimulation : MonoBehaviour {
         // Switch out the textures.
         SwapTextures(velocityTexture);
         SwapTextures(densityTexture);
-        SwapTextures(velocityTexture);
+        SwapTextures(temperatureTexture);
 
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
     }
@@ -118,5 +122,17 @@ public class FluidSimulation : MonoBehaviour {
         RenderTexture tempTexture = texture[0];
         texture[0] = texture[1];
         texture[1] = tempTexture;
+    }
+
+    // Simulates convection currents by using fluid buoyancy.
+    private void AddBuoyancy(RenderTexture velocity, RenderTexture density, RenderTexture temperature, RenderTexture destination) {
+        buoyancyMaterial.SetTexture("_VelocityTexture", velocity);
+        buoyancyMaterial.SetTexture("_DensityTexture", density);
+        buoyancyMaterial.SetTexture("_TemperatureTexture", temperature);
+        buoyancyMaterial.SetFloat("_TimeIncrement", timeIncrement);
+        buoyancyMaterial.SetFloat("_AmbientTemperature", ambientTemperature);
+        buoyancyMaterial.SetFloat("_FluidBuoyancy", fluidBuoyancy);
+        buoyancyMaterial.SetFloat("_FluidWeight", fluidWeight);
+        Graphics.Blit(null, destination, buoyancyMaterial);
     }
 }

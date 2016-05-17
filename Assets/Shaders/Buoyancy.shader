@@ -14,14 +14,14 @@
             float2 uv : TEXCOORD0;
             };
 
-            uniform sampler2D _Velocity;
-            uniform sampler2D _Density;
-            uniform sampler2D _Temperature;
+            uniform sampler2D _VelocityTexture;
+            uniform sampler2D _DensityTexture;
+            uniform sampler2D _TemperatureTexture;
 
             uniform float _TimeIncrement;
             uniform float _AmbientTemperature;
-            uniform float _ScaleFactor;
-            uniform float _Direction;
+            uniform float _FluidBuoyancy;
+            uniform float _FluidWeight;
 
             // Vertex program.
             v2f vert(appdata_base v) {
@@ -33,15 +33,16 @@
 
             // Fragment program.
             float4 frag(v2f i) : COLOR {
-                float temperature = tex2D(_Temperature, i.uv).x;
-                float density = tex2D(_Density, i.uv).x;
-                float2 velocity = tex2D(_Velocity, i.uv).xy;
+                float density = tex2D(_DensityTexture, i.uv).x;
+                float temperature = tex2D(_TemperatureTexture, i.uv).x;
+                float2 velocity = tex2D(_VelocityTexture, i.uv).xy;
 
                 // Apply buoyancy operator where the local temperature is higher than the ambient temperature.
                 float2 resultantVelocity = velocity;
                 if (temperature > _AmbientTemperature) {
+                    float2 direction = float2(0, 1);
                     float temperatureDifference = temperature - _AmbientTemperature;
-                    resultantVelocity += _TimeIncrement * (temperatureDifference * (_ScaleFactor - density) * _Direction) * float2(0, 1);
+                    resultantVelocity += _TimeIncrement * (temperatureDifference * (_FluidBuoyancy - density) * _FluidWeight) * direction;
                 }
 
                 return float4(resultantVelocity, 0, 1);
