@@ -47,6 +47,7 @@ public class FluidSimulation : MonoBehaviour {
 
         // Setup the 0 index read and 1 index write render textures.
         velocityTexture = new RenderTexture[2];
+        CreateTextures(velocityTexture, RenderTextureFormat.RFloat, FilterMode.Bilinear);
 
         GetComponent<GUITexture>().texture = displayTexture;
         displayMaterial.SetTexture("_Solids", solidsTexture);
@@ -58,6 +59,21 @@ public class FluidSimulation : MonoBehaviour {
         Advect(velocityTexture[0], velocityTexture[0], velocityTexture[1], velocityDissipation);
         SwapTextures(velocityTexture);
         Graphics.Blit(solidsTexture, displayTexture, displayMaterial);
+    }
+
+    // Setup and create the textures in the texture arrays.
+    private void CreateTextures(RenderTexture[] texture, RenderTextureFormat format, FilterMode filterMode) {
+        // Setup read texture.
+        texture[0] = new RenderTexture(displayWidth, displayHeight, 0, format, RenderTextureReadWrite.Linear);
+        texture[0].wrapMode = TextureWrapMode.Clamp;
+        texture[0].filterMode = filterMode;
+        texture[0].Create();
+
+        // Setup write texture.
+        texture[1] = new RenderTexture(displayWidth, displayHeight, 0, format, RenderTextureReadWrite.Linear);
+        texture[1].wrapMode = TextureWrapMode.Clamp;
+        texture[1].filterMode = filterMode;
+        texture[1].Create();
     }
 
     // Draws the solids texture and copies it into the solid render texture.
