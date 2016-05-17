@@ -19,7 +19,7 @@
             uniform sampler2D _Solids;
 
             uniform float2 _Size;
-            uniform float _TimeStep;
+            uniform float _TimeIncrement;
             uniform float _Dissipation;
 
             // Vertex program.
@@ -45,7 +45,7 @@
                 float2 velocity = tex2D(_VelocityTexture, i.uv).xy;
 
                 // Coordinate accounting for the size, the timestep, and the input velocity.
-                float2 nextCoord = i.uv - (_Size * _TimeStep * velocity);
+                float2 nextCoord = i.uv - (_Size * _TimeIncrement * velocity);
 
                 // Account for dissipation and get the color on the source texture.
                 color = tex2D(_SourceTexture, nextCoord) * _Dissipation;

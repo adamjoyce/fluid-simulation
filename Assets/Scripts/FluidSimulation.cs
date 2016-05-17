@@ -7,7 +7,7 @@ public class FluidSimulation : MonoBehaviour {
     public Material jacobiMaterial;
     public Material divergenceMaterial;
     public Material gradientMaterial;
-    public Material boundaryMaterial;
+    public Material buoyancyMaterial;
     public Material displayMaterial;
     public Material solidsMaterial;
 
@@ -54,7 +54,9 @@ public class FluidSimulation : MonoBehaviour {
         CreateTextures(velocityTexture, RenderTextureFormat.RGFloat);
 
         // Setup textures for the density and temperature of the fluid.
+        densityTexture = new RenderTexture[2];
         CreateTextures(densityTexture, RenderTextureFormat.RFloat);
+        temperatureTexture = new RenderTexture[2];
         CreateTextures(temperatureTexture, RenderTextureFormat.RFloat);
 
         GetComponent<GUITexture>().texture = displayTexture;
@@ -69,7 +71,7 @@ public class FluidSimulation : MonoBehaviour {
         Advect(velocityTexture[0], densityTexture[0], densityTexture[1], densityDissipation);
         Advect(velocityTexture[0], temperatureTexture[0], temperatureTexture[1], temperatureDissipation);
 
-        // Swap the texture arrays.
+        // Switch out the textures.
         SwapTextures(velocityTexture);
         SwapTextures(densityTexture);
         SwapTextures(velocityTexture);
