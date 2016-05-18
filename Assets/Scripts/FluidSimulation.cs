@@ -12,6 +12,22 @@ public class FluidSimulation : MonoBehaviour {
     public Material solidsMaterial;
     public Material impulseMaterial;
 
+    public Vector2 solidPosition = new Vector2(0.5f, 0.5f);
+
+    public float timeIncrement = 0.125f;
+    public float velocityDissipation = 0.9f;
+    public float densityDissipation = 0.9999f;
+    public float temperatureDissipation = 0.9f;
+
+    public float ambientTemperature = 0.0f;
+    public float fluidBuoyancy = 1.0f;
+    public float fluidWeight = 0.05f;
+
+    public Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
+    public float impulseRadius = 0.1f;
+    public float impulseTemperature = 10.0f;
+    public float impulseDensity = 1.0f;
+
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
     private RenderTexture[] velocityTexture;
@@ -21,22 +37,6 @@ public class FluidSimulation : MonoBehaviour {
     private GUITexture display;
     private int displayWidth, displayHeight;
     private Vector2 displayArea;
-
-    private Vector2 solidPosition = new Vector2(0.5f, 0.5f);
-
-    private float timeIncrement = 0.1f;
-    private float velocityDissipation = 0.5f;
-    private float densityDissipation = 0.5f;
-    private float temperatureDissipation = 0.5f;
-
-    private float ambientTemperature = 0.0f;
-    private float fluidBuoyancy = 1.0f;
-    private float fluidWeight = 0.1f;
-
-    private Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
-    private float impulseRadius = 0.1f;
-    private float impulseTemperature = 10.0f;
-    private float impulseDensity = 1.0f;
 
 	// For initialization.
 	private void Start () {
@@ -76,25 +76,29 @@ public class FluidSimulation : MonoBehaviour {
 	
 	// Update is called once per frame
 	private void Update () {
-        // Advect the velocity, temperature, and density against the velocity.
-        Advect(velocityTexture[0], velocityTexture[0], velocityTexture[1], velocityDissipation);
+        // Advect the density against the velocity.
         Advect(velocityTexture[0], densityTexture[0], densityTexture[1], densityDissipation);
-        Advect(velocityTexture[0], temperatureTexture[0], temperatureTexture[1], temperatureDissipation);
-
-        // Switch out the textures.
-        SwapTextures(velocityTexture);
         SwapTextures(densityTexture);
+
+        // Advect the temperature against the velocity.
+        Advect(velocityTexture[0], temperatureTexture[0], temperatureTexture[1], temperatureDissipation);
         SwapTextures(temperatureTexture);
+
+        // Advect the velocity against itself.
+        Advect(velocityTexture[0], velocityTexture[0], velocityTexture[1], velocityDissipation);
+        SwapTextures(velocityTexture);
 
         // Get the changes in velocity due to convection currents.
         AddBuoyancy(velocityTexture[0], densityTexture[0], temperatureTexture[0], velocityTexture[1]);
         SwapTextures(velocityTexture);
 
-        AddImpulse(temperatureTexture[0], temperatureTexture[1], mainImpulsePosition, impulseRadius, impulseTemperature);
+        // Add the density impulse each frame.
         AddImpulse(densityTexture[0], densityTexture[1], mainImpulsePosition, impulseRadius, impulseDensity);
-
-        SwapTextures(temperatureTexture);
         SwapTextures(densityTexture);
+
+        // Add the temperature impulse each frame.
+        AddImpulse(temperatureTexture[0], temperatureTexture[1], mainImpulsePosition, impulseRadius, impulseTemperature);
+        SwapTextures(temperatureTexture);
 
         Graphics.Blit(densityTexture[0], displayTexture, displayMaterial);
     }

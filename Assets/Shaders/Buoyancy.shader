@@ -42,7 +42,7 @@
                 if (temperature > _AmbientTemperature) {
                     float2 direction = float2(0, 1);
                     float temperatureDifference = temperature - _AmbientTemperature;
-                    resultantVelocity += _TimeIncrement * (temperatureDifference * (_FluidBuoyancy - density) * _FluidWeight) * direction;
+                    resultantVelocity += _TimeIncrement * temperatureDifference * _FluidBuoyancy - density * _FluidWeight * direction;
                 }
 
                 return float4(resultantVelocity, 0, 1);
