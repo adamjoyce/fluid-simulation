@@ -23,13 +23,14 @@ public class FluidSimulation : MonoBehaviour {
     public float fluidBuoyancy = 1.0f;
     public float fluidWeight = 0.05f;
 
-    public Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
+    public Vector2 mainImpulsePosition = new Vector2(0.0f, 0.0f);
     public float impulseRadius = 0.1f;
     public float impulseTemperature = 10.0f;
     public float impulseDensity = 1.0f;
 
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
+    private RenderTexture divergenceTexture;
     private RenderTexture[] velocityTexture;
     private RenderTexture[] densityTexture;
     private RenderTexture[] temperatureTexture;
@@ -163,5 +164,10 @@ public class FluidSimulation : MonoBehaviour {
         impulseMaterial.SetFloat("_Radius", radius);
         impulseMaterial.SetFloat("_Fill", fill);
         Graphics.Blit(null, destination, impulseMaterial);
+    }
+
+    //
+    private void CalculateDivergence() {
+
     }
 }
