@@ -17,8 +17,8 @@
             uniform sampler2D _VelocityTexture;
             uniform sampler2D _SolidsTexture;
 
-            uniform float _HalfInverseCellSize;
-            uniform float2 _InverseSize;
+            uniform float _HalfCellSize;
+            uniform float2 _Size;
 
             // Vertex program.
             v2f vert(appdata_base v) {
@@ -28,10 +28,36 @@
                 return o;
             }
 
-            float4 frag(v2f IN) : COLOR {
-                // Find the veolicties of surronding cells.
+            float4 frag(v2f i) : COLOR {
+                // Find the velocities of surronding cells.
+                float2 velocityUp = tex2D(_VelocityTexture, float2(0, _Size.y) + i.uv).xy;
+                float2 velocityDown = tex2D(_VelocityTexture, float2(0, -_Size.y) + i.uv).xy;
+                float2 velocityLeft = tex2D(_VelocityTexture, float2(-_Size.x, 0) + i.uv).xy;
+                float2 velocityRight = tex2D(_VelocityTexture, float2(_Size.x, 0) + i.uv).xy;
 
-                // Find any ssurronding solids and set their velocities to zero.
+                // Find any surronding solids and set their velocities to zero.
+                float solidUp = tex2D(_SolidsTexture, float2(0, _Size.y) + i.uv).x;
+                if (solidUp > 0) {
+                    velocityUp = 0;
+                }
+
+                float solidDown = tex2D(_SolidsTexture, float2(0, -_Size.y) + i.uv).x;
+                if (solidDown > 0) {
+                    velocityDown = 0;
+                }
+
+                float solidLeft = tex2D(_SolidsTexture, float2(-_Size.x, 0) + i.uv).x;
+                if (solidLeft > 0) {
+                    velocityLeft = 0;
+                }
+
+                float solidRight = tex2D(_SolidsTexture, float2(_Size.x, 0) + i.uv).x;
+                if (solidRight > 0) {
+                    velocityRight = 0;
+                }
+
+                float divergenceValue = ((velocityUp.y - velocityDown.y) + (velocityRight.x - velocityLeft.x)) _HalfCellSize;
+                return float4(divergenceValue, 0, 0, 1);
             }
 
             ENDCG
