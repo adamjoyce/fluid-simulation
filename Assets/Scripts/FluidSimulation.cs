@@ -23,12 +23,16 @@ public class FluidSimulation : MonoBehaviour {
     public float fluidBuoyancy = 1.0f;
     public float fluidWeight = 0.05f;
 
-    public Vector2 mainImpulsePosition = new Vector2(0.0f, 0.0f);
+    public Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
     public float impulseRadius = 0.1f;
     public float impulseTemperature = 10.0f;
     public float impulseDensity = 1.0f;
 
     public float cellSize = 1.0f;
+    public float gradientScale = 1.0f;
+
+    public int numberOfJacobiIterations = 50;
+    public float jacobiBeta = 0.25f;
 
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
@@ -120,6 +124,14 @@ public class FluidSimulation : MonoBehaviour {
         ResetField(pressureTexture[0]);
 
         // Jacobi iterations.
+        for (int i = 0; i < numberOfJacobiIterations; i++) {
+            iterateJacobi(divergenceTexture, pressureTexture[0], pressureTexture[1]);
+            SwapTextures(pressureTexture);
+        }
+
+        // Subtracts the graident of the solved pressure equation from the intermediate velocity field.
+        SubtractGradient(velocityTexture[0], pressureTexture[0], velocityTexture[1]);
+        SwapTextures(velocityTexture);
 
         Graphics.Blit(densityTexture[0], displayTexture, displayMaterial);
     }
@@ -201,5 +213,26 @@ public class FluidSimulation : MonoBehaviour {
         Graphics.SetRenderTarget(field);
         GL.Clear(false, true, backgroundColour);
         Graphics.SetRenderTarget(null);
+    }
+
+    // Run a Jacobi iteration for solving the diffusion equation.
+    private void iterateJacobi(RenderTexture divergence, RenderTexture pressure, RenderTexture destination) {
+        jacobiMaterial.SetTexture("_DivergenceTexture", divergence);
+        jacobiMaterial.SetTexture("_PressureTexture", pressure);
+        jacobiMaterial.SetTexture("_SolidsTexture", solidsTexture);
+        jacobiMaterial.SetVector("_Size", displayArea);
+        jacobiMaterial.SetFloat("_Alpha", cellSize * -cellSize);
+        jacobiMaterial.SetFloat("_Beta", jacobiBeta);
+        Graphics.Blit(null, destination, jacobiMaterial);
+    }
+
+    // Subtracts a gradient from a velocity field.
+    private void SubtractGradient(RenderTexture velocity, RenderTexture pressure, RenderTexture destination) {
+        gradientMaterial.SetTexture("_VelocityTexture", velocity);
+        gradientMaterial.SetTexture("_PressureTexture", pressure);
+        gradientMaterial.SetTexture("_SolidsTexture", solidsTexture);
+        gradientMaterial.SetVector("_Size", displayArea);
+        gradientMaterial.SetFloat("_GradientScale", gradientScale);
+        Graphics.Blit(null, destination, gradientMaterial);
     }
 }

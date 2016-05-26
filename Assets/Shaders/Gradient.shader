@@ -1,41 +1,75 @@
 ﻿Shader "Custom/Gradient" {
-	Properties {
-		_Color ("Color", Color) = (1,1,1,1)
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
-		_Glossiness ("Smoothness", Range(0,1)) = 0.5
-		_Metallic ("Metallic", Range(0,1)) = 0.0
-	}
-	SubShader {
-		Tags { "RenderType"="Opaque" }
-		LOD 200
-		
-		CGPROGRAM
-		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard fullforwardshadows
+    SubShader {
+        Pass {
+            CGPROGRAM
+            // Compilation directives.
+            #pragma target 3.0
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
 
-		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 3.0
+            // Vertex to fragment structure.
+            struct v2f {
+            float4 pos : SV_POSITION;
+            float2 uv : TEXCOORD0;
+            };
 
-		sampler2D _MainTex;
+            uniform sampler2D _VelocityTexture;
+            uniform sampler2D _PressureTexture;
+            uniform sampler2D _SolidsTexture;
 
-		struct Input {
-			float2 uv_MainTex;
-		};
+            uniform float2 _Size;
+            uniform float _GradientScale;
 
-		half _Glossiness;
-		half _Metallic;
-		fixed4 _Color;
+            // Vertex program.
+            v2f vert(appdata_base v) {
+                v2f o;
+                o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+                o.uv = v.texcoord.xy;
+                return o;
+            }
 
-		void surf (Input IN, inout SurfaceOutputStandard o) {
-			// Albedo comes from a texture tinted by color
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-			o.Albedo = c.rgb;
-			// Metallic and smoothness come from slider variables
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
-		}
-		ENDCG
-	}
-	FallBack "Diffuse"
+            // Fragment program.
+            float4 frag(v2f i) : COLOR {
+                // Pressure at the centre.
+                float pressureCentre = tex2D(_PressureTexture, i.uv).x;
+
+                // Find the pressure of surronding cells.
+                float pressureUp = tex2D(_PressureTexture, float2(0, _Size.y) + i.uv).x;
+                float pressureDown = tex2D(_PressureTexture, float2(0, -_Size.y) + i.uv).x;
+                float pressureLeft = tex2D(_PressureTexture, float2(-_Size.x, 0) + i.uv).x;
+                float pressureRight = tex2D(_PressureTexture, float2(_Size.x, 0) + i.uv).x;
+
+                // Find any surronding solids and set their pressure to the central pressure.
+                float solidUp = tex2D(_SolidsTexture, float2(0, _Size.y) + i.uv).x;
+                if (solidUp > 0) {
+                    pressureUp = pressureCentre;
+                }
+
+                float solidDown = tex2D(_SolidsTexture, float2(0, -_Size.y) + i.uv).x;
+                if (solidDown > 0) {
+                    pressureDown = pressureCentre;
+                }
+
+                float solidLeft = tex2D(_SolidsTexture, float2(-_Size.x, 0) + i.uv).x;
+                if (solidLeft > 0) {
+                    pressureLeft = pressureCentre;
+                }
+
+                float solidRight = tex2D(_SolidsTexture, float2(_Size.x, 0) + i.uv).x;
+                if (solidRight > 0) {
+                    pressureRight = pressureCentre;
+                }
+
+                // Free slip boundary condition.
+                float2 gradient = _GradientScale * float2(pressureLeft - pressureRight, pressureUp - pressureDown);
+                float2 velocity = tex2D(_VelocityTexture, i.uv).xy;
+                float2 newVelocity = velocity - gradient;
+
+                return float4(newVelocity, 0, 1);
+            }
+
+            ENDCG
+        }
+    }
 }

@@ -31,7 +31,7 @@
             }
 
             // Fragment program.
-            float4 frag(v2f i) : COLOR{
+            float4 frag(v2f i) : COLOR {
                 // Pressure at the centre.
                 float pressureCentre = tex2D(_PressureTexture, i.uv).x;
 
@@ -42,7 +42,7 @@
                 float pressureRight = tex2D(_PressureTexture, float2(_Size.x, 0) + i.uv).x;
 
                 // Find any surronding solids and set their pressure to the central pressure.
-                float solidCentre = tex2D(_SolidTexture, i.uv).x;
+                float solidCentre = tex2D(_DivergenceTexture, i.uv).x;
 
                 float solidUp = tex2D(_SolidsTexture, float2(0, _Size.y) + i.uv).x;
                 if (solidUp > 0) {
@@ -64,7 +64,7 @@
                     pressureRight = pressureCentre;
                 }
 
-                return (pressureUp + pressureDown + pressureLeft + pressureRight + _Aplha * solidCentre) * _Beta;
+                return (pressureUp + pressureDown + pressureLeft + pressureRight + _Alpha * solidCentre) * _Beta;
             }
 
             ENDCG
