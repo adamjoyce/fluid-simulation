@@ -28,6 +28,7 @@
                 return o;
             }
 
+            // Fragment Program.
             float4 frag(v2f i) : COLOR {
                 // Find the velocities of surronding cells.
                 float2 velocityUp = tex2D(_VelocityTexture, float2(0, _Size.y) + i.uv).xy;
