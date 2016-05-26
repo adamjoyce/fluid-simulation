@@ -62,7 +62,7 @@
                 }
 
                 // Free slip boundary condition.
-                float2 gradient = _GradientScale * float2(pressureLeft - pressureRight, pressureUp - pressureDown);
+                float2 gradient = _GradientScale * float2(pressureRight - pressureLeft, pressureUp - pressureDown);
                 float2 velocity = tex2D(_VelocityTexture, i.uv).xy;
                 float2 newVelocity = velocity - gradient;
 

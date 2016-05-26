@@ -40,13 +40,12 @@
                 // Apply buoyancy operator where the local temperature is higher than the ambient temperature.
                 float2 resultantVelocity = velocity;
                 if (temperature > _AmbientTemperature) {
-                    float2 direction = float2(1, 1);
+                    float2 direction = float2(0, 1);
                     float temperatureDifference = temperature - _AmbientTemperature;
-                    resultantVelocity += _TimeIncrement * temperatureDifference * _FluidBuoyancy - density * _FluidWeight * direction;
+                    resultantVelocity += (_TimeIncrement * temperatureDifference * _FluidBuoyancy - density * _FluidWeight) * direction;
                 }
 
                 return float4(resultantVelocity, 0, 1);
-
             }
 
             ENDCG

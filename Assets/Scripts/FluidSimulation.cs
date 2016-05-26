@@ -15,16 +15,16 @@ public class FluidSimulation : MonoBehaviour {
     public Vector2 solidPosition = new Vector2(0.5f, 0.5f);
 
     public float timeIncrement = 0.125f;
-    public float velocityDissipation = 0.9f;
+    public float velocityDissipation = 0.99f;
     public float densityDissipation = 0.9999f;
-    public float temperatureDissipation = 0.9f;
+    public float temperatureDissipation = 0.99f;
 
     public float ambientTemperature = 0.0f;
     public float fluidBuoyancy = 1.0f;
     public float fluidWeight = 0.05f;
 
     public Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
-    public float impulseRadius = 0.1f;
+    public float impulseRadius = 0.5f;
     public float impulseTemperature = 10.0f;
     public float impulseDensity = 1.0f;
 
@@ -77,7 +77,7 @@ public class FluidSimulation : MonoBehaviour {
         velocityTexture = new RenderTexture[2];
         CreateTextures(velocityTexture, RenderTextureFormat.RGFloat);
 
-        // Setup textures for the density and temperature of the fluid.
+        // Setup textures for the density, temperature, and pressure.
         densityTexture = new RenderTexture[2];
         CreateTextures(densityTexture, RenderTextureFormat.RFloat);
         temperatureTexture = new RenderTexture[2];
@@ -89,9 +89,9 @@ public class FluidSimulation : MonoBehaviour {
         displayMaterial.SetTexture("_Solids", solidsTexture);
         PlaceSolids();
 	}
-	
-	// Update is called once per frame
-	private void Update () {
+
+    // Update is called once per frame
+    private void Update() {
         // Advect the density against the velocity.
         Advect(velocityTexture[0], densityTexture[0], densityTexture[1], densityDissipation);
         SwapTextures(densityTexture);
