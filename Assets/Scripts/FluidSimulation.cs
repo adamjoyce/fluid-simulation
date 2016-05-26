@@ -28,12 +28,15 @@ public class FluidSimulation : MonoBehaviour {
     public float impulseTemperature = 10.0f;
     public float impulseDensity = 1.0f;
 
+    public float cellSize = 1.0f;
+
     private RenderTexture displayTexture;
     private RenderTexture solidsTexture;
     private RenderTexture divergenceTexture;
     private RenderTexture[] velocityTexture;
     private RenderTexture[] densityTexture;
     private RenderTexture[] temperatureTexture;
+    private RenderTexture[] pressureTexture;
 
     private GUITexture display;
     private int displayWidth, displayHeight;
@@ -60,6 +63,12 @@ public class FluidSimulation : MonoBehaviour {
         solidsTexture.filterMode = FilterMode.Point;
         solidsTexture.Create();
 
+        //Setup the fluid divergence texture.
+        divergenceTexture = new RenderTexture(displayWidth, displayHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+        divergenceTexture.wrapMode = TextureWrapMode.Clamp;
+        divergenceTexture.filterMode = FilterMode.Point;
+        divergenceTexture.Create();
+
         // Setup the 0 index read and 1 index write render textures.
         velocityTexture = new RenderTexture[2];
         CreateTextures(velocityTexture, RenderTextureFormat.RGFloat);
@@ -69,6 +78,8 @@ public class FluidSimulation : MonoBehaviour {
         CreateTextures(densityTexture, RenderTextureFormat.RFloat);
         temperatureTexture = new RenderTexture[2];
         CreateTextures(temperatureTexture, RenderTextureFormat.RFloat);
+        pressureTexture = new RenderTexture[2];
+        CreateTextures(pressureTexture, RenderTextureFormat.RFloat, FilterMode.Point);
 
         GetComponent<GUITexture>().texture = displayTexture;
         displayMaterial.SetTexture("_Solids", solidsTexture);
@@ -100,6 +111,15 @@ public class FluidSimulation : MonoBehaviour {
         // Add the temperature impulse each frame.
         AddImpulse(temperatureTexture[0], temperatureTexture[1], mainImpulsePosition, impulseRadius, impulseTemperature);
         SwapTextures(temperatureTexture);
+
+        // Add secondary impulse at mouse here.
+
+        // Begin the projection steps.
+        // Calucate the fluid's velocity divergence and use zero as our initial guess for the pressure field.
+        CalculateDivergence(velocityTexture[0], divergenceTexture);
+        ResetField(pressureTexture[0]);
+
+        // Jacobi iterations.
 
         Graphics.Blit(densityTexture[0], displayTexture, displayMaterial);
     }
@@ -166,8 +186,20 @@ public class FluidSimulation : MonoBehaviour {
         Graphics.Blit(null, destination, impulseMaterial);
     }
 
-    //
-    private void CalculateDivergence() {
+    // Calculates the divergence of the fluid's velocity into the surronding cells.
+    private void CalculateDivergence(RenderTexture velocity, RenderTexture destination) {
+        divergenceMaterial.SetTexture("_VelocityTexture", velocity);
+        divergenceMaterial.SetTexture("_SolidsTexture", solidsTexture);
+        divergenceMaterial.SetFloat("_HalfCellSize", 0.5f / cellSize);
+        divergenceMaterial.SetVector("_Size", displayArea);
+        Graphics.Blit(null, destination, divergenceMaterial);
+    }
 
+    // Clears a render texture field to zeros.
+    private void ResetField(RenderTexture field) {
+        Color backgroundColour = new Color(0, 0, 0, 0);
+        Graphics.SetRenderTarget(field);
+        GL.Clear(false, true, backgroundColour);
+        Graphics.SetRenderTarget(null);
     }
 }

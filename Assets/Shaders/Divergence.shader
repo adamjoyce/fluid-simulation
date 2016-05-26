@@ -56,7 +56,7 @@
                     velocityRight = 0;
                 }
 
-                float divergenceValue = ((velocityUp.y - velocityDown.y) + (velocityRight.x - velocityLeft.x)) _HalfCellSize;
+                float divergenceValue = ((velocityUp.y - velocityDown.y) + (velocityRight.x - velocityLeft.x)) * _HalfCellSize;
                 return float4(divergenceValue, 0, 0, 1);
             }
 
