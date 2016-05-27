@@ -1,6 +1,6 @@
 ﻿Shader "Custom/Display" {
 	Properties {
-		_MainTex ("Base (RGB)", 2D) = "white" {}
+		_MainTex ("Base (RGB)", 2D) = "black" {}
 	}
 
 	SubShader {
@@ -37,7 +37,9 @@
 
                 // Determine the colour.
                 float3 color = float3(solid, solid, solid);
-                color.x += main;        
+                color.y += main;
+                color.z += main;
+
 				return float4(color, 1);
 			}
 
