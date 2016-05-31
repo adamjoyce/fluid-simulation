@@ -12,6 +12,7 @@ public class FluidSimulation : MonoBehaviour {
     public Material solidsMaterial;
     public Material impulseMaterial;
 
+    public int numberOfSolids = 3;
     public Vector2 solidPosition = new Vector2(0.5f, 0.5f);
 
     public float timeIncrement = 0.125f;
@@ -23,7 +24,7 @@ public class FluidSimulation : MonoBehaviour {
     public float fluidBuoyancy = 1.0f;
     public float fluidWeight = 0.05f;
 
-    public Vector2 mainImpulsePosition = new Vector2(0.5f, 0.0f);
+    public Vector2 mainImpulsePosition = new Vector2(0.0f, 0.0f);
     public float impulseRadius = 0.5f;
     public float impulseTemperature = 10.0f;
     public float impulseDensity = 1.0f;
@@ -87,8 +88,8 @@ public class FluidSimulation : MonoBehaviour {
 
         GetComponent<GUITexture>().texture = displayTexture;
         displayMaterial.SetTexture("_Solids", solidsTexture);
-        PlaceSolids();
-	}
+        PlaceSolids(0.1f);
+    }
 
     // Update is called once per frame
     private void Update() {
@@ -116,8 +117,6 @@ public class FluidSimulation : MonoBehaviour {
         AddImpulse(temperatureTexture[0], temperatureTexture[1], mainImpulsePosition, impulseRadius, impulseTemperature);
         SwapTextures(temperatureTexture);
 
-        // Add secondary impulse at mouse here.
-
         // Begin the projection steps.
         // Calucate the fluid's velocity divergence and use zero as our initial guess for the pressure field.
         CalculateDivergence(velocityTexture[0], divergenceTexture);
@@ -125,7 +124,7 @@ public class FluidSimulation : MonoBehaviour {
 
         // Jacobi iterations.
         for (int i = 0; i < numberOfJacobiIterations; i++) {
-            iterateJacobi(divergenceTexture, pressureTexture[0], pressureTexture[1]);
+            IterateJacobi(divergenceTexture, pressureTexture[0], pressureTexture[1]);
             SwapTextures(pressureTexture);
         }
 
@@ -152,10 +151,10 @@ public class FluidSimulation : MonoBehaviour {
     }
 
     // Draws the solids texture and copies it into the solid render texture.
-    private void PlaceSolids() {
+    private void PlaceSolids(float radius) {
         solidsMaterial.SetVector("_Size", displayArea);
         solidsMaterial.SetVector("_Location", solidPosition);
-        solidsMaterial.SetFloat("_Radius", 0.1f);
+        solidsMaterial.SetFloat("_Radius", radius);
         Graphics.Blit(null, solidsTexture, solidsMaterial);
     }
 
@@ -216,7 +215,7 @@ public class FluidSimulation : MonoBehaviour {
     }
 
     // Run a Jacobi iteration for solving the diffusion equation.
-    private void iterateJacobi(RenderTexture divergence, RenderTexture pressure, RenderTexture destination) {
+    private void IterateJacobi(RenderTexture divergence, RenderTexture pressure, RenderTexture destination) {
         jacobiMaterial.SetTexture("_DivergenceTexture", divergence);
         jacobiMaterial.SetTexture("_PressureTexture", pressure);
         jacobiMaterial.SetTexture("_SolidsTexture", solidsTexture);

@@ -32,13 +32,13 @@
 
             // Fragment program.
             float4 frag(v2f i) : COLOR {
-                float4 color;
+                float4 result;
                 
                 // See if an obstacle is present.
                 float solidObstacle = tex2D(_Solids, i.uv).x;
                 if (solidObstacle > 0.0) {
-                    color = float4(0, 0, 0, 0);
-                    return color;
+                    result = float4(0, 0, 0, 0);
+                    return result;
                 }
 
                 // Input velocity.
@@ -48,9 +48,9 @@
                 float2 nextCoord = i.uv - (_Size * _TimeIncrement * velocity);
 
                 // Account for dissipation and get the color on the source texture.
-                color = tex2D(_SourceTexture, nextCoord) * _Dissipation;
+                result = tex2D(_SourceTexture, nextCoord) * _Dissipation;
 
-                return color;
+                return result;
             }
 
             ENDCG

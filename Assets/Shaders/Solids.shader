@@ -30,7 +30,7 @@
             float4 frag(v2f i) : COLOR {
                 float4 color = float4(0, 0, 0, 0);
                 
-                // Draw bounding edges.
+                // Draws bounding edges.
                 if (i.uv.x <= _Size.x) {
                     color = float4(1, 1, 1, 1);
                 } else if (i.uv.x >= 1.0 - _Size.x) {
@@ -43,7 +43,7 @@
                     color = float4(1, 1, 1, 1);
                 }
 
-                // Draw point location in circle.
+                // Draws point location in circle.
                 float loc = distance(_Location, i.uv);
                 if (loc < _Radius) {
                     color = float4(1, 1, 1, 1);
